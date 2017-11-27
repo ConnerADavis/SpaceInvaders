@@ -11,6 +11,7 @@ public abstract class SIinvader extends SIship {
 	
 	public SIinvader()
 	{
+	    super();
 		swap = false;
 		setHitImage(getImage("SIinvaderBlast.gif"));
 	}

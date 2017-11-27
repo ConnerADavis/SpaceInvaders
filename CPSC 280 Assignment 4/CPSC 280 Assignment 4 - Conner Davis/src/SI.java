@@ -82,6 +82,7 @@ public class SI extends JFrame {
 		
 		menubar.add(game);
 		menubar.add(help);
+		add(panel);
 		
 		setJMenuBar(menubar);
 		

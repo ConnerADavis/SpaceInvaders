@@ -4,8 +4,14 @@ import java.awt.Image;
 public abstract class SIship extends SIthing {
     
     private boolean isHit;
-    private AudioClip hitSound = getSound("SIshipHit.wav");
+    private AudioClip hitSound;
     private Image hitImage;
+    
+    public SIship()
+    {
+        isHit = false;
+        hitSound = getSound("SIshipHit.wav");
+    }
     
     public boolean isHitBy(SImissile missile)
     {
