@@ -1,6 +1,11 @@
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class SIpanel extends JPanel {
+    
+    private boolean isPaused;
+    private int score;
+    private Timer timer;
 	
 	public SIpanel()
 	{
@@ -8,23 +13,14 @@ public class SIpanel extends JPanel {
 	}
 
 	public void dialogPause() {
-		// TODO Auto-generated method stub
-		
+	    // TODO Auto-generated method stub
 	}
 
 	public void dialogUnpause() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public boolean isPaused()
-	{
-		// TODO Auto-generated method stub
-	}
-	
-	public boolean isGameInProgress()
-	{
-		// TODO Auto-generated method stub
+		if(!isPaused)
+		{
+		    unpause();
+		}
 	}
 
 	public void startNewGame() {
@@ -38,8 +34,6 @@ public class SIpanel extends JPanel {
 	}
 
 	public void unpause() {
-		// TODO Auto-generated method stub
-		
+	    
 	}
-
 }

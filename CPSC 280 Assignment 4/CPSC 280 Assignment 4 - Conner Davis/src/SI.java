@@ -102,8 +102,10 @@ public class SI extends JFrame {
 	
 	private void displayAboutDialog()
     {
+	    panel.dialogPause();
         JOptionPane.showMessageDialog(this, new JLabel("<html><hr><b>Space Invaders</b><br>by Conner A. Davis</hr></html>"), 
                 "Message",JOptionPane.INFORMATION_MESSAGE);
+        panel.dialogUnpause();
     }
 	
 	private void displayExitDialog()

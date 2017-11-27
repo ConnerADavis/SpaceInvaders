@@ -1,3 +1,4 @@
+import java.awt.Graphics2D;
 
 public abstract class SIthing {
 	
@@ -6,6 +7,9 @@ public abstract class SIthing {
 	private int y;
 	private int width;
 	private int height;
+	
+
+    public abstract void paint(Graphics2D g2);
 	
 	public int getX() {
 		return x;
@@ -30,6 +34,18 @@ public abstract class SIthing {
 	}
 	public void setHeight(int height) {
 		this.height = height;
+	}
+	
+	public void move(int distance, Direction d)
+	{
+	    switch(d)
+	    {
+	        case UP    : y -= distance;
+	        case DOWN  : y += distance;
+	        case LEFT  : x -= distance;
+	        case RIGHT : x += distance;
+	    }
+	    //I figured this would be sufficient given nothing travels in multiple directions at once
 	}
 	
 }
