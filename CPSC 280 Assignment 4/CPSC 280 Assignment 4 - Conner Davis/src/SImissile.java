@@ -2,9 +2,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
-public class SImissle extends SIthing {
+public class SImissile extends SIthing {
     
-    public SImissle(int x, int y)
+    public SImissile(int x, int y)
     {
         super.setX(x);
         super.setY(y);

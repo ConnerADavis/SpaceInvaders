@@ -1,4 +1,10 @@
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.net.URL;
+
+import javax.swing.ImageIcon;
 
 public abstract class SIthing {
 	
@@ -38,14 +44,66 @@ public abstract class SIthing {
 	
 	public void move(int distance, Direction d)
 	{
-	    switch(d)
-	    {
-	        case UP    : y -= distance;
-	        case DOWN  : y += distance;
-	        case LEFT  : x -= distance;
-	        case RIGHT : x += distance;
-	    }
+		if(canMove(distance, d))
+		{
+		    switch(d)
+		    {
+		        case UP    : y -= distance;
+		        case DOWN  : y += distance;
+		        case LEFT  : x -= distance;
+		        case RIGHT : x += distance;
+		    }
+		}
 	    //I figured this would be sufficient given nothing travels in multiple directions at once
 	}
+	
+	public boolean canMove(int distance, Direction d)
+	{
+		if(d == Direction.UP)
+		{
+			if(y - distance > 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		if(d == Direction.DOWN)
+		{
+			if(y + height + distance  < 450)
+			{
+				return true;
+			}
+			return false;
+		}
+		if(d == Direction.LEFT)
+		{
+			if(x - distance > 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		if(d == Direction.RIGHT)
+		{
+			if(x + width + distance < 500)
+			{
+				return true;
+			}
+			return false;
+		}
+		return false;
+	}
+	
+	public Image getImage(String fileName)
+    {
+        URL url = getClass().getResource(fileName);
+        ImageIcon icon = new ImageIcon(url);
+        return icon.getImage();
+    }
+	
+	public AudioClip getSound(String fileName) {
+        URL url = getClass().getResource(fileName);
+        return Applet.newAudioClip(url);
+    }
 	
 }

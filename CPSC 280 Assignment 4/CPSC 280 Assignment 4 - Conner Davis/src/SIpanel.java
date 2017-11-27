@@ -1,12 +1,15 @@
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+@SuppressWarnings("serial")
 public class SIpanel extends JPanel {
     
     private boolean isPaused;
     private int score;
     private Timer timer;
 	
+    
+    //if destroyed, wait until next pace cycle before deleting
 	public SIpanel()
 	{
 		

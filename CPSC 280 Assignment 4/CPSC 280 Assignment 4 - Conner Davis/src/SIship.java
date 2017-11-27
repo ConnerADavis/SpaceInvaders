@@ -1,7 +1,5 @@
-import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.Image;
-import java.net.URL;
 
 public abstract class SIship extends SIthing {
     
@@ -9,14 +7,15 @@ public abstract class SIship extends SIthing {
     private AudioClip hitSound = getSound("SIshipHit.wav");
     private Image hitImage;
     
-    public boolean isHitBy(SImissle missle)
+    public boolean isHitBy(SImissile missile)
     {
-        int mx = missle.getX();
-        int my = missle.getY();
-        if (super.getX() <= mx + missle.getWidth() && super.getX() + super.getWidth() >= mx)
+        int mx = missile.getX();
+        int my = missile.getY();
+        if (super.getX() <= mx + missile.getWidth() && super.getX() + super.getWidth() >= mx)
         {
-            if(super.getY() <= my + missle.getHeight() && super.getY() + super.getHeight() >= my)
+            if(super.getY() <= my + missile.getHeight() && super.getY() + super.getHeight() >= my)
             {
+            	missile = null;
                 return true;
             }
         }
@@ -37,11 +36,6 @@ public abstract class SIship extends SIthing {
     {
         setIsHit(true);
         hitSound.play();
-    }
-    
-    private AudioClip getSound(String fileName) {
-        URL url = getClass().getResource(fileName);
-        return Applet.newAudioClip(url);
     }
 
     public boolean getIsHit() {

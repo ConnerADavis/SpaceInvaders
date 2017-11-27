@@ -1,10 +1,6 @@
 import java.awt.Graphics2D;
-import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.Image;
-import java.net.URL;
-
-import javax.swing.ImageIcon;
 
 
 public class SIbase extends SIship {
@@ -32,15 +28,5 @@ public class SIbase extends SIship {
         }
     }
     
-    private AudioClip getSound(String fileName) {
-        URL url = getClass().getResource(fileName);
-        return Applet.newAudioClip(url);
-    }
     
-    private Image getImage(String fileName)
-    {
-        URL url = getClass().getResource(fileName);
-        ImageIcon icon = new ImageIcon(url);
-        return icon.getImage();
-    }
 }

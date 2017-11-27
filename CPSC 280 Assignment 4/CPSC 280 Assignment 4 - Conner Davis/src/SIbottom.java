@@ -1,11 +1,11 @@
-import java.awt.Graphics2D;
 
 public class SIbottom extends SIinvader {
-
-    @Override
-    public void paint(Graphics2D g2) {
-        // TODO Auto-generated method stub
-        
-    }
-
+	
+	public SIbottom()
+	{
+		super();
+		super.setAlive1(getImage("SIbottom0.gif"));
+		super.setAlive2(getImage("SIbottom1.gif"));
+		super.setPointValue(10);
+	}
 }
