@@ -23,14 +23,32 @@ public abstract class SIship extends SIthing {
         return false;
     }
     
+    public void setHitImage(Image i)
+    {
+        hitImage = i;
+    }
+    
+    public Image getHitImage()
+    {
+        return hitImage;
+    }
+    
     public void hit()
     {
-        isHit = true;
+        setIsHit(true);
         hitSound.play();
     }
     
     private AudioClip getSound(String fileName) {
         URL url = getClass().getResource(fileName);
         return Applet.newAudioClip(url);
+    }
+
+    public boolean getIsHit() {
+        return isHit;
+    }
+
+    public void setIsHit(boolean isHit) {
+        this.isHit = isHit;
     }
 }
