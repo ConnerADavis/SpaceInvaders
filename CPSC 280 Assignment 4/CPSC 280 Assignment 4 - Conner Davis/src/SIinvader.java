@@ -56,12 +56,10 @@ public abstract class SIinvader extends SIship {
         {
         	if(isSwap())
         	{
-        		setSwap(false);
         		g2.drawImage(getAlive2(), getX(), getY(), null);
         	}
         	else
         	{
-        		setSwap(true);
         		g2.drawImage(getAlive1(), getX(), getY(), null);
         	}
         }

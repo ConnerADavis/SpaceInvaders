@@ -48,10 +48,10 @@ public abstract class SIthing {
 		{
 		    switch(d)
 		    {
-		        case UP    : y -= distance;
-		        case DOWN  : y += distance;
-		        case LEFT  : x -= distance;
-		        case RIGHT : x += distance;
+		        case UP    : y -= distance; break;
+		        case DOWN  : y += distance; break;
+		        case LEFT  : x -= distance; break;
+		        case RIGHT : x += distance; break;
 		    }
 		}
 	    //I figured this would be sufficient given nothing travels in multiple directions at once

@@ -10,10 +10,18 @@ public class SIbase extends SIship {
     
     public SIbase()
     {
+    	super();
+    	super.setWidth(26);
+    	super.setHeight(20);
         shoot = getSound("SIbaseShoot.wav");
         setIsHit(false);
         alive = getImage("SIbase.gif");
         setHitImage(getImage("SIbaseBlast.gif"));
+    }
+    
+    public int getMiddle()
+    {
+    	return super.getX() + (super.getWidth()/2);
     }
 
     @Override
@@ -27,6 +35,12 @@ public class SIbase extends SIship {
             g2.drawImage(alive, getX(), getY(), null);
         }
     }
+
+	public SImissile shoot() {
+		SImissile missile = new SImissile(super.getX() + (super.getWidth()/2), super.getY() - 10);
+		missile.setDirection(Direction.UP);
+		return missile;
+	}
     
     
 }

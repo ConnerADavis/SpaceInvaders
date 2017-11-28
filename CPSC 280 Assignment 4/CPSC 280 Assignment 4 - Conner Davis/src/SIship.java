@@ -21,7 +21,6 @@ public abstract class SIship extends SIthing {
         {
             if(super.getY() <= my + missile.getHeight() && super.getY() + super.getHeight() >= my)
             {
-            	missile = null;
                 return true;
             }
         }
@@ -41,7 +40,7 @@ public abstract class SIship extends SIthing {
     public void hit()
     {
         setIsHit(true);
-        hitSound.play();
+        //hitSound.play();
     }
 
     public boolean getIsHit() {

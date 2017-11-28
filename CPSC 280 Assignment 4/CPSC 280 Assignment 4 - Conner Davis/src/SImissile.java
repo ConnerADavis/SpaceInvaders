@@ -3,6 +3,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 public class SImissile extends SIthing {
+	
+	private Direction direction;
     
     public SImissile(int x, int y)
     {
@@ -17,5 +19,13 @@ public class SImissile extends SIthing {
          g2.setColor(Color.WHITE);
          g2.fill(new Rectangle2D.Double(super.getX(), super.getY(), super.getWidth(), super.getHeight()));
     }
+
+	public Direction getDirection() {
+		return direction;
+	}
+
+	public void setDirection(Direction direction) {
+		this.direction = direction;
+	}
 
 }
