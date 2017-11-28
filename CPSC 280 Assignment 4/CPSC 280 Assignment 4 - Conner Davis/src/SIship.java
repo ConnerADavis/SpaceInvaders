@@ -38,6 +38,10 @@ public abstract class SIship extends SIthing {
     public void hit()
     {
         setIsHit(true);
+        
+        //I don't understand why, but this doesn't work on linux.
+        //It crashes on the second destroyed ship.
+        //Works fine on windows though, and hopefully macOS as well
         getSound("SIshipHit.wav").play();
         
     }

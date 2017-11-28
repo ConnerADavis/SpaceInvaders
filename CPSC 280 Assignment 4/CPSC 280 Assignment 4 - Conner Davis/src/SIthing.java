@@ -7,8 +7,7 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 
 public abstract class SIthing {
-	
-	enum Direction{UP, DOWN, LEFT, RIGHT}
+    
 	private int x;
 	private int y;
 	private int width;

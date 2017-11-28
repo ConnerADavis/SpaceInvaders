@@ -10,6 +10,17 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+
+/*
+ * TO DO
+ * Create  missile firing system
+ * Change invader pace on wall hit
+ * Add change of furthestLeft and furthestRight
+ * Add mystery ship
+ * Create point system.
+ * Limit frequency of missiles fired
+ * Add check for base destroyed
+ */
 @SuppressWarnings("serial")
 public class SIpanel extends JPanel {
     
@@ -18,15 +29,22 @@ public class SIpanel extends JPanel {
     private Timer timer;
 	private SIinvader[][] invaders;
 	private SIbase base;
-	private int timerThingy;
+	private int increment;
+	private int invaderUpdate;
+	private int furthestLeft;
+	private int furthestRight;
+	private Direction invaderMovement;
 	private ArrayList<SImissile> playerMissiles;
 	private ArrayList<SIthing> toDelete;
+	private ArrayList<SImissile> invaderMissiles;
     
     //if destroyed, wait until next pace cycle before deleting
 	public SIpanel()
 	{
-		playerMissiles = new ArrayList<>();
-		toDelete = new ArrayList<>();
+		playerMissiles  = new ArrayList<>();
+		toDelete        = new ArrayList<>();
+		invaderMissiles = new ArrayList<>();
+		invaderUpdate = 40;
 	    setBackground(Color.BLACK);
 	    setFocusable(true);
 	    base = new SIbase();
@@ -36,36 +54,10 @@ public class SIpanel extends JPanel {
 	    //I couldn't figure out the problem with my rendering code
 	    base.setY(395 - base.getHeight());
 	    invaders = new SIinvader[10][5];
+	    furthestLeft = 0;
+	    furthestRight = 9;
 	    
-	    int y = 24;
-	    for(int i = 0; i < 5; i++)
-	    {
-	        int x = 100;
-	        for(int j = 0; j < 10; j++)
-	        {
-	            if(i < 1)
-	            {
-	                invaders[j][i] = new SItop();
-	                invaders[j][i].setX(x);
-	                invaders[j][i].setY(y);
-	                
-	            }
-	            else if(i < 3)
-	            {
-	                invaders[j][i] = new SImiddle();
-	                invaders[j][i].setX(x);
-	                invaders[j][i].setY(y);
-	            }
-	            else
-	            {
-	                invaders[j][i] = new SIbottom();
-	                invaders[j][i].setX(x);
-	                invaders[j][i].setY(y);
-	            }
-	            x += 30;
-	        }
-	        y += 24;
-	    }
+	    instantiateInvaders();
 	    
 	    
 	    addKeyListener(new KeyAdapter() {
@@ -73,74 +65,39 @@ public class SIpanel extends JPanel {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				switch(e.getKeyCode()) {
-				case KeyEvent.VK_RIGHT : base.move(5,SIthing.Direction.RIGHT); break;
-				case KeyEvent.VK_LEFT  : base.move(5,SIthing.Direction.LEFT);  break;
-				case KeyEvent.VK_SPACE : playerMissiles.add(base.shoot());     break;
+				case KeyEvent.VK_RIGHT : base.move(5, Direction.RIGHT); break;
+				case KeyEvent.VK_LEFT  : base.move(5, Direction.LEFT);  break;
+				}
+				
+				if(e.getKeyCode() == KeyEvent.VK_SPACE)
+				{
+				    //Check added for game balance reasons
+				    if(playerMissiles.size() <= 3)
+				    {
+				        playerMissiles.add(base.shoot());
+				    }
 				}
 			}
-			
-			/*@Override
-			public void keyReleased(KeyEvent e) {
-				switch(e.getKeyCode()) {
-				case KeyEvent.VK_UP : base.move(false, SIthing.Direction.UP); break;
-				case KeyEvent.VK_DOWN : base.move(false, SIthing.Direction.DOWN); break;
-				case KeyEvent.VK_RIGHT : base.move(false, SIthing.Direction.RIGHT); break;
-				case KeyEvent.VK_LEFT : base.move(false, SIthing.Direction.LEFT); break;
-				}
-			}*/
 		});
-	    timerThingy = 0;
+	    
+	    
+	    increment = 0;
 	    timer = new Timer(10, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				repaint();
-				for(SIthing t : toDelete)
-				{
-					playerMissiles.removeAll(toDelete);
-					for(int i = 0; i < invaders.length; i++)
-					{
-						for(int j = 0; j < invaders[i].length; j++)
-						{
-							if(invaders[i][j] != null)
-							{
-								if(invaders[i][j] == t)
-								{
-									invaders[i][j] = null;
-								}
-							}
-						}
-					}
-					t = null;
-				}
-				toDelete = new ArrayList<>();
-				timerThingy++;
+				removeGarbage();
 				
-				for(int i = 0; i < invaders.length; i++)
-				{
-					for(int j = 0; j < invaders[i].length; j++)
-					{
-						if(invaders[i][j] != null)
-						{
-							for(SImissile m : playerMissiles)
-							{
-								if(invaders[i][j].isHitBy(m))
-								{
-									invaders[i][j].hit();
-									toDelete.add(invaders[i][j]);
-									toDelete.add(m);
-								}
-							}
-						}
-					}
-				}
+				checkForHits();
 				
-				if(timerThingy%100==0)
+				if(increment % invaderUpdate == 0)
 				{ 
-					swapInvaders();
+					updateInvaders();
 				}
-				if(timerThingy == 3001)
+				//I chose 3733 because it's a prime number so it won't interfere with any other operations
+				if(increment == 3733)
 				{
-					timerThingy = 0;
+					increment = 0;
 				}
 				
 				for(SImissile m : playerMissiles)
@@ -149,11 +106,14 @@ public class SIpanel extends JPanel {
 					if(!m.canMove(5, m.getDirection()))
 					{
 						toDelete.add(m);
+						
 					}
 				}
+
 				
+				
+                increment++;
 			}
-	    	
 	    });
 	    
 	    //REMOVE THIS BEFORE SUBMITTING FINAL
@@ -162,7 +122,29 @@ public class SIpanel extends JPanel {
 	    timer.start();
 	}
 
-	public void dialogPause() {
+	protected void removeGarbage() {
+	    for(SIthing t : toDelete)
+        {
+            playerMissiles.removeAll(toDelete);
+            for(int i = 0; i < invaders.length; i++)
+            {
+                for(int j = 0; j < invaders[i].length; j++)
+                {
+                    if(invaders[i][j] != null)
+                    {
+                        if(invaders[i][j] == t)
+                        {
+                            invaders[i][j] = null;
+                        }
+                    }
+                }
+            }
+            t = null;
+        }
+        toDelete = new ArrayList<>();
+    }
+
+    public void dialogPause() {
 		timer.stop();
 	}
 
@@ -174,8 +156,7 @@ public class SIpanel extends JPanel {
 	}
 
 	public void startNewGame() {
-		// TODO Auto-generated method stub
-		
+	    timer.start();
 	}
 
 	public void pause() {
@@ -187,7 +168,7 @@ public class SIpanel extends JPanel {
 	    timer.start();
 	}
 	
-	private void swapInvaders()
+	private void updateInvaders()
 	{
 		for(int i = 0; i < invaders.length; i++)
 		{
@@ -199,6 +180,134 @@ public class SIpanel extends JPanel {
 				}
 			}
 		}
+		if(invaderMovement == Direction.RIGHT)
+		{
+		    if(invaders[furthestRight][0].canMove(5, Direction.RIGHT))
+		    {
+		        for(int i = 0; i < invaders.length; i++)
+		        {
+		            for(int j = 0; j < invaders[i].length; j++)
+		            {
+		                if(invaders[i][j] != null)
+		                {
+		                    invaders[i][j].move(5, Direction.RIGHT);
+		                }
+		            }
+		        }
+		    }
+		    else
+		    {
+		        for(int i = 0; i < invaders.length; i++)
+                {
+                    for(int j = 0; j < invaders[i].length; j++)
+                    {
+                        if(invaders[i][j] != null)
+                        {
+                            invaders[i][j].move(12, Direction.DOWN);
+                        }
+                    }
+                }
+		        invaderMovement = Direction.LEFT;
+		        if(invaderUpdate > 1)
+		        {
+		            invaderUpdate = (invaderUpdate * 4)/ 5;
+		        }
+		    }
+		}
+		else if(invaderMovement == Direction.LEFT)
+        {
+            if(invaders[furthestLeft][0].canMove(5, Direction.LEFT))
+            {
+                for(int i = 0; i < invaders.length; i++)
+                {
+                    for(int j = 0; j < invaders[i].length; j++)
+                    {
+                        if(invaders[i][j] != null)
+                        {
+                            invaders[i][j].move(5, Direction.LEFT);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for(int i = 0; i < invaders.length; i++)
+                {
+                    for(int j = 0; j < invaders[i].length; j++)
+                    {
+                        if(invaders[i][j] != null)
+                        {
+                            invaders[i][j].move(12, Direction.DOWN);
+                        }
+                    }
+                }
+                invaderMovement = Direction.RIGHT;
+                if(invaderUpdate > 1)
+                {
+                    invaderUpdate = (invaderUpdate * 4)/ 5;
+                }
+            }
+        }
+	}
+	
+	private void checkForHits()
+	{
+	    for(int i = 0; i < invaders.length; i++)
+        {
+            for(int j = 0; j < invaders[i].length; j++)
+            {
+                if(invaders[i][j] != null)
+                {
+                    for(SImissile m : playerMissiles)
+                    {
+                        if(invaders[i][j].isHitBy(m))
+                        {
+                            invaders[i][j].hit();
+                            toDelete.add(invaders[i][j]);
+                            toDelete.add(m);
+                            
+                        }
+                    }
+                }
+            }
+        }
+	    
+	    
+	}
+	
+	private void instantiateInvaders()
+	{
+	    int y = 24;
+        for(int i = 0; i < 5; i++)
+        {
+            int x = 100;
+            for(int j = 0; j < 10; j++)
+            {
+                if(i < 1)
+                {
+                    invaders[j][i] = new SItop();
+                    invaders[j][i].setX(x);
+                    invaders[j][i].setY(y);
+                    
+                }
+                else if(i < 3)
+                {
+                    invaders[j][i] = new SImiddle();
+                    invaders[j][i].setX(x);
+                    invaders[j][i].setY(y);
+                }
+                else
+                {
+                    invaders[j][i] = new SIbottom();
+                    invaders[j][i].setX(x);
+                    invaders[j][i].setY(y);
+                }
+                x += 30;
+            }
+            y += 24;
+            
+        }
+        invaderMovement = Direction.RIGHT;
 	}
 	
 	protected void paintComponent(Graphics g)
