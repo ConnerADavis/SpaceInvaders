@@ -72,7 +72,7 @@ public class SIpanel extends JPanel {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE)
 				{
 				    //Check added for game balance reasons
-				    if(playerMissiles.size() <= 3)
+				    if(playerMissiles.size() < 3)
 				    {
 				        playerMissiles.add(base.shoot());
 				    }

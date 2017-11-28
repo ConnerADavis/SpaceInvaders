@@ -39,6 +39,7 @@ public class SIbase extends SIship {
 	public SImissile shoot() {
 		SImissile missile = new SImissile(super.getX() + (super.getWidth()/2), super.getY() - 10);
 		missile.setDirection(Direction.UP);
+		shoot.play();
 		return missile;
 	}
     

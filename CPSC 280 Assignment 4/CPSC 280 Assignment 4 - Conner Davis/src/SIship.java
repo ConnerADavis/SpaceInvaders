@@ -5,10 +5,12 @@ public abstract class SIship extends SIthing {
     
     private boolean isHit;
     private Image hitImage;
+    private AudioClip hitSound;
     
     public SIship()
     {
         isHit = false;
+        hitSound = getSound("pop.wav");
     }
     
     public boolean isHitBy(SImissile missile)
@@ -42,7 +44,8 @@ public abstract class SIship extends SIthing {
         //I don't understand why, but this doesn't work on linux.
         //It crashes on the second destroyed ship.
         //Works fine on windows though, and hopefully macOS as well
-        getSound("SIshipHit.wav").play();
+        hitSound.play();
+        //System.out.print("Whatever");
         
     }
 
