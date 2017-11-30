@@ -2,6 +2,16 @@
 <project default = "main">
 	<target name = "main">
 		<javac srcdir="../src" destdir="../bin"/>
-		<jar basedir="../bin" destfile="${jar.name}"/>
+		<jar destfile="SpaceInvaders.jar">
+			<fileset dir ="../bin"/>
+			<manifest>
+				<attribute name="Main-Class" value="SI"/>
+				<section name="Information">
+					<attribute name="Author" value="Conner Davis"/>
+					<attribute name="Affiliation" value="CNU CPSC 280"/>
+					<attribute name="Date" value="11/30/2017"/>
+				</section>
+			</manifest>
+		</jar>
 	</target>
 </project>
