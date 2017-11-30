@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -13,7 +14,7 @@ import javax.swing.Timer;
 
 /*
  * TO DO
- * Create  missile firing system
+ * Create invader missile firing system
  * Change invader pace on wall hit
  * Add change of furthestLeft and furthestRight
  * Add mystery ship
@@ -37,7 +38,11 @@ public class SIpanel extends JPanel {
 	private ArrayList<SImissile> playerMissiles;
 	private ArrayList<SIthing> toDelete;
 	private ArrayList<SImissile> invaderMissiles;
-    
+	private boolean ongoingGame;
+	private Font scoreFont;
+	private boolean gameLost;
+	private boolean won;
+	
     //if destroyed, wait until next pace cycle before deleting
 	public SIpanel()
 	{
@@ -56,6 +61,9 @@ public class SIpanel extends JPanel {
 	    invaders = new SIinvader[10][5];
 	    furthestLeft = 0;
 	    furthestRight = 9;
+	    ongoingGame = false;
+	    gameLost = false;
+	    scoreFont = new Font("Arial", Font.PLAIN, 20);
 	    
 	    instantiateInvaders();
 	    
@@ -100,6 +108,8 @@ public class SIpanel extends JPanel {
 					increment = 0;
 				}
 				
+				attemptToFire();
+				
 				for(SImissile m : playerMissiles)
 				{
 					m.move(5, m.getDirection());
@@ -109,8 +119,23 @@ public class SIpanel extends JPanel {
 						
 					}
 				}
-
 				
+				for(SImissile m : invaderMissiles)
+				{
+					m.move(2, m.getDirection());
+					if(!m.canMove(2, m.getDirection()))
+					{
+						toDelete.add(m);
+					}
+				}
+				
+				for(SImissile m : invaderMissiles)
+				{
+					if(base.isHitBy(m))
+					{
+						
+					}
+				}
 				
                 increment++;
 			}
@@ -122,7 +147,29 @@ public class SIpanel extends JPanel {
 	    timer.start();
 	}
 
-	protected void removeGarbage() {
+	private void attemptToFire() {
+		for(int i = 0; i < 10; i++)
+		{
+			attemptToFire(i);
+		}
+		
+	}
+	
+	private void attemptToFire(int i)
+	{
+		for(int j = 4; j >= 0; j--)
+		{
+			if(invaders[i][j] != null)
+			{
+				if(System.currentTimeMillis() % 5 != 0)
+				{
+					invaders[i][j].shoot();
+				}
+			}
+		}
+	}
+
+	private void removeGarbage() {
 	    for(SIthing t : toDelete)
         {
             playerMissiles.removeAll(toDelete);
@@ -149,7 +196,7 @@ public class SIpanel extends JPanel {
 	}
 
 	public void dialogUnpause() {
-		if(!isPaused)
+		if(!isPaused && ongoingGame)
 		{
 		    unpause();
 		}
@@ -165,11 +212,29 @@ public class SIpanel extends JPanel {
 	}
 
 	public void unpause() {
-	    timer.start();
+		if(ongoingGame)
+		{
+			timer.start();
+		}
+	}
+	
+	public void win()
+	{
+		timer.stop();
+		won = true;
+		repaint();
 	}
 	
 	private void updateInvaders()
 	{
+		if(isColumnEmpty(furthestLeft))
+		{
+			furthestLeft++;
+		}
+		if(isColumnEmpty(furthestRight))
+		{
+			furthestRight--;
+		}
 		for(int i = 0; i < invaders.length; i++)
 		{
 			for(int j = 0; j < invaders[i].length; j++)
@@ -182,71 +247,85 @@ public class SIpanel extends JPanel {
 		}
 		if(invaderMovement == Direction.RIGHT)
 		{
-		    if(invaders[furthestRight][0].canMove(5, Direction.RIGHT))
-		    {
-		        for(int i = 0; i < invaders.length; i++)
-		        {
-		            for(int j = 0; j < invaders[i].length; j++)
-		            {
-		                if(invaders[i][j] != null)
+			for(int l = 0; l < 5; l++)
+			{
+				if(invaders[furthestRight][l] != null)
+				{
+				    if(invaders[furthestRight][l].canMove(5, Direction.RIGHT))
+				    {
+				        for(int i = 0; i < invaders.length; i++)
+				        {
+				            for(int j = 0; j < invaders[i].length; j++)
+				            {
+				                if(invaders[i][j] != null)
+				                {
+				                    invaders[i][j].move(5, Direction.RIGHT);
+				                }
+				            }
+				        }
+				    }
+				    else
+				    {
+				        for(int i = 0; i < invaders.length; i++)
 		                {
-		                    invaders[i][j].move(5, Direction.RIGHT);
+		                    for(int j = 0; j < invaders[i].length; j++)
+		                    {
+		                        if(invaders[i][j] != null)
+		                        {
+		                            invaders[i][j].move(12, Direction.DOWN);
+		                        }
+		                    }
 		                }
-		            }
-		        }
-		    }
-		    else
-		    {
-		        for(int i = 0; i < invaders.length; i++)
-                {
-                    for(int j = 0; j < invaders[i].length; j++)
-                    {
-                        if(invaders[i][j] != null)
-                        {
-                            invaders[i][j].move(12, Direction.DOWN);
-                        }
-                    }
-                }
-		        invaderMovement = Direction.LEFT;
-		        if(invaderUpdate > 1)
-		        {
-		            invaderUpdate = (invaderUpdate * 4)/ 5;
-		        }
-		    }
+				        invaderMovement = Direction.LEFT;
+				        if(invaderUpdate > 1)
+				        {
+				            invaderUpdate = (invaderUpdate * 4)/ 5;
+				        }
+				    }
+				    break;
+				}
+			}
 		}
 		else if(invaderMovement == Direction.LEFT)
         {
-            if(invaders[furthestLeft][0].canMove(5, Direction.LEFT))
-            {
-                for(int i = 0; i < invaders.length; i++)
-                {
-                    for(int j = 0; j < invaders[i].length; j++)
-                    {
-                        if(invaders[i][j] != null)
-                        {
-                            invaders[i][j].move(5, Direction.LEFT);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                for(int i = 0; i < invaders.length; i++)
-                {
-                    for(int j = 0; j < invaders[i].length; j++)
-                    {
-                        if(invaders[i][j] != null)
-                        {
-                            invaders[i][j].move(12, Direction.DOWN);
-                        }
-                    }
-                }
-                invaderMovement = Direction.RIGHT;
-                if(invaderUpdate > 1)
-                {
-                    invaderUpdate = (invaderUpdate * 4)/ 5;
-                }
-            }
+			for(int l = 0; l < 5; l++)
+			{
+				if(invaders[furthestLeft][l] != null)
+				{
+		            if(invaders[furthestLeft][l].canMove(5, Direction.LEFT))
+		            {
+		                for(int i = 0; i < invaders.length; i++)
+		                {
+		                    for(int j = 0; j < invaders[i].length; j++)
+		                    {
+		                        if(invaders[i][j] != null)
+		                        {
+		                            invaders[i][j].move(5, Direction.LEFT);
+		                        }
+		                    }
+		                }
+		            }
+		            else
+		            {
+		                for(int i = 0; i < invaders.length; i++)
+		                {
+		                    for(int j = 0; j < invaders[i].length; j++)
+		                    {
+		                        if(invaders[i][j] != null)
+		                        {
+		                            invaders[i][j].move(12, Direction.DOWN);
+		                        }
+		                    }
+		                }
+		                invaderMovement = Direction.RIGHT;
+		                if(invaderUpdate > 1)
+		                {
+		                    invaderUpdate = (invaderUpdate * 4)/ 5;
+		                }
+		            }
+		            break;
+				}
+			}
         }
 	}
 	
@@ -262,17 +341,16 @@ public class SIpanel extends JPanel {
                     {
                         if(invaders[i][j].isHitBy(m))
                         {
+                        	score += invaders[i][j].getPointValue();
                             invaders[i][j].hit();
                             toDelete.add(invaders[i][j]);
                             toDelete.add(m);
-                            
                         }
                     }
                 }
             }
         }
-	    
-	    
+	    //TODO: check for base hits
 	}
 	
 	private void instantiateInvaders()
@@ -310,6 +388,25 @@ public class SIpanel extends JPanel {
         invaderMovement = Direction.RIGHT;
 	}
 	
+	private void gameOver()
+	{
+		timer.stop();
+		ongoingGame = false;
+		gameLost = true;
+	}
+	
+	private boolean isColumnEmpty(int colNum)
+	{
+		for(int i = 0; i < 5; i++) 
+		{
+			if(invaders[colNum][i] != null)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	protected void paintComponent(Graphics g)
 	{
 	    super.paintComponent(g);
@@ -332,6 +429,22 @@ public class SIpanel extends JPanel {
 	    for(SImissile m : playerMissiles)
 	    {
 	    	m.paint(g2);
+	    }
+	    
+	    g2.setColor(Color.CYAN);
+	    g2.setFont(scoreFont);
+	    String scoreDisplay = "Score:" + score;
+	    int x = getWidth() - g2.getFontMetrics(scoreFont).stringWidth(scoreDisplay) - 2;
+	    
+	    g2.drawString(scoreDisplay, x, 20);
+	    
+	    if(gameLost)
+	    {
+	    	String gameOver = "Game Over";
+	    	int x2 = (getWidth() / 2) - (g2.getFontMetrics(scoreFont).stringWidth(gameOver)/2);
+	    	int y2 = (getHeight() / 2) - (g2.getFontMetrics(scoreFont).getHeight()/2);
+	    	
+	    	g2.drawString(gameOver, x2, y2);
 	    }
 	    
 	}

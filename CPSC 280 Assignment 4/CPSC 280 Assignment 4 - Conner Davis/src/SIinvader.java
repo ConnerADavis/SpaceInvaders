@@ -48,6 +48,13 @@ public abstract class SIinvader extends SIship {
 		this.swap = swap;
 	}
 	
+	public SImissile shoot()
+	{
+		SImissile missile = new SImissile(super.getX() + (super.getWidth()/2), super.getY() -(super.getHeight() + 10));
+		missile.setDirection(Direction.DOWN);
+		return missile;
+	}
+	
 	//This uses methods instead of references to the variables because
 	//I originally wrote this for one of the subclasses
 	@Override
