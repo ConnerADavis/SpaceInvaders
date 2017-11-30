@@ -50,7 +50,7 @@ public abstract class SIinvader extends SIship {
 	
 	public SImissile shoot()
 	{
-		SImissile missile = new SImissile(super.getX() + (super.getWidth()/2), super.getY() -(super.getHeight() + 10));
+		SImissile missile = new SImissile(super.getX() + (super.getWidth()/2), super.getY() + super.getHeight());
 		missile.setDirection(Direction.DOWN);
 		return missile;
 	}

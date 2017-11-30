@@ -7,20 +7,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 
 /*
- * TO DO
- * Create invader missile firing system
- * Change invader pace on wall hit
- * Add change of furthestLeft and furthestRight
- * Add mystery ship
- * Create point system.
- * Limit frequency of missiles fired
- * Add check for base destroyed
+ * TODO
+ * --Create invader missile firing system
+ * --Change invader pace on wall hit
+ * --Add change of furthestLeft and furthestRight
+ * --Add mystery ship
+ * --Create point system.
+ * --Limit frequency of missiles fired
+ * --Add check for base destroyed
+ * --Create lose condition
  */
 @SuppressWarnings("serial")
 public class SIpanel extends JPanel {
@@ -42,6 +44,9 @@ public class SIpanel extends JPanel {
 	private Font scoreFont;
 	private boolean gameLost;
 	private boolean won;
+	private int fireDelay;
+	private SImystery mystery;
+    private Random rand;
 	
     //if destroyed, wait until next pace cycle before deleting
 	public SIpanel()
@@ -64,6 +69,9 @@ public class SIpanel extends JPanel {
 	    ongoingGame = false;
 	    gameLost = false;
 	    scoreFont = new Font("Arial", Font.PLAIN, 20);
+	    won = false;
+        fireDelay = 50;
+        rand = new Random();
 	    
 	    instantiateInvaders();
 	    
@@ -80,9 +88,10 @@ public class SIpanel extends JPanel {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE)
 				{
 				    //Check added for game balance reasons
-				    if(playerMissiles.size() < 3)
+				    if(playerMissiles.size() < 3 && fireDelay == 50)
 				    {
 				        playerMissiles.add(base.shoot());
+				        fireDelay = 0;
 				    }
 				}
 			}
@@ -102,13 +111,15 @@ public class SIpanel extends JPanel {
 				{ 
 					updateInvaders();
 				}
-				//I chose 3733 because it's a prime number so it won't interfere with any other operations
-				if(increment == 3733)
+				if(increment == 200000)
 				{
-					increment = 0;
+					increment = 1;
 				}
 				
-				attemptToFire();
+				if(invaderMissiles.size() < 3)
+				{
+	                attemptToFire();
+				}
 				
 				for(SImissile m : playerMissiles)
 				{
@@ -129,22 +140,56 @@ public class SIpanel extends JPanel {
 					}
 				}
 				
-				for(SImissile m : invaderMissiles)
+				if(furthestLeft <= furthestRight && isColumnEmpty(furthestLeft) && isColumnEmpty(furthestRight))
+	            {
+				    win();
+	            }
+				
+				if(fireDelay < 50)
 				{
-					if(base.isHitBy(m))
-					{
-						
-					}
+				    fireDelay++;
 				}
 				
+				if(mystery == null)
+				{
+				    if(increment % 100 == 0)
+				    {
+				        if(rand.nextInt(100) > 95)
+				        {
+				            mystery = new SImystery();
+				            mystery.setX(500);
+				            mystery.setY(0);
+				            mystery.playSound();
+				        }
+				    }
+				}
+				if(mystery != null)
+		        {
+		            mystery.move(1, Direction.LEFT);
+		            for(SImissile m : playerMissiles)
+		            {
+		                if(mystery.isHitBy(m))
+		                {
+		                    mystery.hit();
+		                    score += mystery.getPointValue();
+		                    toDelete.add(mystery);
+		                }
+		            }
+		            if(mystery.getX() + mystery.getWidth() < 0)
+		            {
+		                mystery = null;
+		            }
+		        }
                 increment++;
+                
+                checkForLoss();
 			}
 	    });
 	    
 	    //REMOVE THIS BEFORE SUBMITTING FINAL
 	    //SERIOUSLY THIS IS ONLY FOR BUGTESTING
 	    //DON'T LEAVE THIS HERE
-	    timer.start();
+	    //timer.start();
 	}
 
 	private void attemptToFire() {
@@ -157,22 +202,48 @@ public class SIpanel extends JPanel {
 	
 	private void attemptToFire(int i)
 	{
-		for(int j = 4; j >= 0; j--)
-		{
-			if(invaders[i][j] != null)
-			{
-				if(System.currentTimeMillis() % 5 != 0)
-				{
-					invaders[i][j].shoot();
-				}
-			}
-		}
+	    if(invaderMissiles.size() < 3)
+	    {
+	        for(int j = 4; j >= 0; j--)
+	        {
+	            if(invaders[i][j] != null)
+	            {
+	                //I changed it from an 80% chance to 50% so the missiles wouldn't all be clustered on the left
+	                if(rand.nextInt(100)  < 50)
+	                {
+	                    invaderMissiles.add(invaders[i][j].shoot());
+	                }
+	                return;
+	            }
+	        }
+	    }
+	}
+	
+	private void checkForLoss()
+	{
+	    for(int i = 4; i > 0; i--)
+	    {
+	        if(!isRowEmpty(i))
+	        {
+	            for(int j = 0; j < 10; j++)
+	            {
+	                if(invaders[j][i] != null)
+	                {
+	                    if(invaders[j][i].getY() >= 350)
+	                    {
+	                        gameOver();
+	                    }
+	                }
+	            }
+	        }
+	    }
 	}
 
 	private void removeGarbage() {
 	    for(SIthing t : toDelete)
         {
             playerMissiles.removeAll(toDelete);
+            invaderMissiles.removeAll(toDelete);
             for(int i = 0; i < invaders.length; i++)
             {
                 for(int j = 0; j < invaders[i].length; j++)
@@ -203,7 +274,29 @@ public class SIpanel extends JPanel {
 	}
 
 	public void startNewGame() {
-	    timer.start();
+	    timer.stop();
+	    
+	    
+	    playerMissiles  = new ArrayList<>();
+        toDelete        = new ArrayList<>();
+        invaderMissiles = new ArrayList<>();
+        invaderUpdate = 40;
+	    isPaused = false;
+	    score = 0;
+	    instantiateInvaders();
+	    invaderMovement = Direction.RIGHT;
+	    base = new SIbase();
+	    base.setX(250 - (base.getWidth()/2));
+        base.setY(395 - base.getHeight());
+	    increment = 0;
+	    furthestLeft = 0;
+        furthestRight = 9;
+        ongoingGame = true;
+        gameLost = false;
+        won = false;
+        mystery = null;
+	    
+	    timer.restart();
 	}
 
 	public void pause() {
@@ -220,6 +313,7 @@ public class SIpanel extends JPanel {
 	
 	public void win()
 	{
+	    ongoingGame = false;
 		timer.stop();
 		won = true;
 		repaint();
@@ -350,7 +444,14 @@ public class SIpanel extends JPanel {
                 }
             }
         }
-	    //TODO: check for base hits
+	    for(SImissile m : invaderMissiles)
+	    {
+	        if(base.isHitBy(m))
+	        {
+	            base.hit();
+	            gameOver();
+	        }
+	    }
 	}
 	
 	private void instantiateInvaders()
@@ -407,6 +508,18 @@ public class SIpanel extends JPanel {
 		return true;
 	}
 	
+	private boolean isRowEmpty(int row)
+	{
+	    for(int i = 0; i < 10; i++)
+	    {
+	        if(invaders[i][row] != null)
+	        {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+	
 	protected void paintComponent(Graphics g)
 	{
 	    super.paintComponent(g);
@@ -426,11 +539,20 @@ public class SIpanel extends JPanel {
 	        }
 	    }
 	    
+	    if(mystery != null)
+	    {
+	        mystery.paint(g2);
+	    }
+	    
 	    for(SImissile m : playerMissiles)
 	    {
 	    	m.paint(g2);
 	    }
 	    
+	    for(SImissile m : invaderMissiles)
+	    {
+	        m.paint(g2);
+	    }
 	    g2.setColor(Color.CYAN);
 	    g2.setFont(scoreFont);
 	    String scoreDisplay = "Score:" + score;
@@ -445,6 +567,15 @@ public class SIpanel extends JPanel {
 	    	int y2 = (getHeight() / 2) - (g2.getFontMetrics(scoreFont).getHeight()/2);
 	    	
 	    	g2.drawString(gameOver, x2, y2);
+	    }
+	    
+	    if(won)
+	    {
+	        String youWin = "YOU WIN!";
+	        int x2 = (getWidth() / 2) - (g2.getFontMetrics(scoreFont).stringWidth(youWin)/2);
+            int y2 = (getHeight() / 2) - (g2.getFontMetrics(scoreFont).getHeight()/2);
+            
+            g2.drawString(youWin, x2, y2);
 	    }
 	    
 	}

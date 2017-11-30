@@ -43,5 +43,4 @@ public class SIbase extends SIship {
 		return missile;
 	}
     
-    
 }
