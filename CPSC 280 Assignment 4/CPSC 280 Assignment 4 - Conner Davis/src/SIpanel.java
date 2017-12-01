@@ -85,7 +85,7 @@ public class SIpanel extends JPanel {
 				case KeyEvent.VK_LEFT  : base.move(5, Direction.LEFT);  break;
 				}
 				
-				if(e.getKeyCode() == KeyEvent.VK_SPACE)
+				if(e.getKeyCode() == KeyEvent.VK_SPACE && ongoingGame)
 				{
 				    //Check added for game balance reasons
 				    if(playerMissiles.size() < 3 && fireDelay == 50)
